@@ -7,7 +7,6 @@
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-
 struct Queue {
     length: u32,
     first_half: Vec<u32>,
