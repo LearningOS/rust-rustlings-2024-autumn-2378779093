@@ -27,7 +27,7 @@ enum IntoColorError {
     IntConversion,
 }
 
-// I AM NOT DONE
+
 
 // Your task is to complete this implementation and return an Ok result of inner
 // type Color. You need to create an implementation for a tuple of three
@@ -40,21 +40,60 @@ enum IntoColorError {
 // Tuple implementation
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
+
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let (r, g, b) = tuple;
+        // Check if each color component is within the range of 0 to 255
+        if (0..=255).contains(&r) && (0..=255).contains(&g) && (0..=255).contains(&b) {
+            Ok(Color {
+                red: r as u8,    // Cast to u8 after range check
+                green: g as u8,  // Cast to u8 after range check
+                blue: b as u8,   // Cast to u8 after range check
+            })
+        } else {
+            Err(IntoColorError::IntConversion)
+        }
     }
 }
 
-// Array implementation
+// Implement TryFrom for array
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
+
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        let [r, g, b] = arr;
+        // Check if each color component is within the range of 0 to 255
+        if (0..=255).contains(&r) && (0..=255).contains(&g) && (0..=255).contains(&b) {
+            Ok(Color {
+                red: r as u8,    // Cast to u8 after range check
+                green: g as u8,  // Cast to u8 after range check
+                blue: b as u8,   // Cast to u8 after range check
+            })
+        } else {
+            Err(IntoColorError::IntConversion)
+        }
     }
 }
 
-// Slice implementation
+// Implement TryFrom for slice
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
+
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        }
+        let [r, g, b]: &[i16; 3] = slice.try_into().map_err(|_| IntoColorError::BadLen)?;
+        // Check if each color component is within the range of 0 to 255
+        if (0..=255).contains(r) && (0..=255).contains(g) && (0..=255).contains(b) {
+            Ok(Color {
+                red: *r as u8,    // Cast to u8 after range check
+                green: *g as u8,  // Cast to u8 after range check
+                blue: *b as u8,   // Cast to u8 after range check
+            })
+        } else {
+            Err(IntoColorError::IntConversion)
+        }
     }
 }
 
@@ -145,26 +184,17 @@ mod tests {
     #[test]
     fn test_slice_out_of_range_positive() {
         let arr = [10000, 256, 1000];
-        assert_eq!(
-            Color::try_from(&arr[..]),
-            Err(IntoColorError::IntConversion)
-        );
+        assert_eq!(Color::try_from(&arr[..]), Err(IntoColorError::IntConversion));
     }
     #[test]
     fn test_slice_out_of_range_negative() {
         let arr = [-256, -1, -10];
-        assert_eq!(
-            Color::try_from(&arr[..]),
-            Err(IntoColorError::IntConversion)
-        );
+        assert_eq!(Color::try_from(&arr[..]), Err(IntoColorError::IntConversion));
     }
     #[test]
     fn test_slice_sum() {
         let arr = [-1, 255, 255];
-        assert_eq!(
-            Color::try_from(&arr[..]),
-            Err(IntoColorError::IntConversion)
-        );
+        assert_eq!(Color::try_from(&arr[..]), Err(IntoColorError::IntConversion));
     }
     #[test]
     fn test_slice_correct() {
